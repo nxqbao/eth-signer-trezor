@@ -1,0 +1,43 @@
+{
+  "name": "@nxqbao/eth-signer-trezor",
+  "version": "0.1.1",
+  "description": "Sign ethereum transaction/messages using Trezor",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "lint": "eslint \"**/*.ts\"",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "prepare": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nxqbao/eth-signer-trezor.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nxqbao/eth-signer-trezor/issues"
+  },
+  "homepage": "https://github.com/nxqbao/eth-signer-trezor#readme",
+  "dependencies": {
+    "ethers": "^5.5.4",
+    "hdkey": "^2.0.1",
+    "trezor-connect": "8.2.9-extended"
+  },
+  "devDependencies": {
+    "@types/jest": "^28.1.0",
+    "@typescript-eslint/eslint-plugin": "^4.27.0",
+    "@typescript-eslint/parser": "^4.27.0",
+    "eslint": "^7.29.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "jest": "^28.1.0",
+    "prettier": "^2.3.1",
+    "ts-jest": "^28.0.4",
+    "ts-node": "^10.8.0",
+    "typescript": "^4.3.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

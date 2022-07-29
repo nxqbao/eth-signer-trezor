@@ -1,0 +1,6 @@
+examples
+dist
+node_modules
+src/frame-signers/**/*
+src/weidex/**/*
+demo/**/*

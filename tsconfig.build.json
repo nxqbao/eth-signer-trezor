@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "es2019",
+    "module": "commonjs",
+    "declaration": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "noUnusedLocals": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "exclude": [
+    "examples",
+    "dist",
+    "tests",
+    "jest.config.ts",
+    "node_modules",
+    "demo",
+    "src/frame-signers/**/*",
+    "src/weidex/**/*",
+    "demo/**/*"
+  ]
+}

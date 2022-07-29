@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "incremental": true,
+    "target": "es2019",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "noEmit": true,
+    "strict": true,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "noUnusedLocals": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "exclude": [
+    "examples",
+    "dist",
+    "node_modules",
+    "src/frame-signers/**/*",
+    "src/weidex/**/*",
+    "demo/**/*"
+  ]
+}
