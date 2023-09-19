@@ -1,15 +1,17 @@
-import { utils, Signer, providers, UnsignedTransaction } from 'ethers'
+import { TypedDataSigner, Signer, TypedDataDomain, TypedDataField } from '@ethersproject/abstract-signer'
+import { utils, providers, UnsignedTransaction } from 'ethers'
 import TrezorConnect, {
   Response,
   Unsuccessful,
   EthereumSignTransaction,
-} from 'trezor-connect'
-import { ConnectError } from './error'
+} from '@trezor/connect';
+import { transformTypedData } from "@trezor/connect-plugin-ethereum";
+import { ConnectError } from './error';
 import HDkey from 'hdkey';
 
-const manifest = { 
-  email: 'engineer@axieinfinity.com', 
-  appUrl: 'https://www.skymavis.com/' 
+const manifest = {
+  email: 'engineer@axieinfinity.com',
+  appUrl: 'https://www.skymavis.com/'
 }
 
 const config = {
@@ -25,24 +27,24 @@ const HD_WALLET_PATH_BASE = `m`
 const DEFAULT_HD_PATH_STRING = "m/44'/60'/0'/0" // TODO: handle <chainId>
 const DEFAULT_SESSION_NAME = 'trezor-signer'
 
-async function handleResponse <T> (p: Response<T>) {
+async function handleResponse<T>(p: Response<T>) {
   const response = await p;
-  
+
   if (response.success) {
     return response.payload;
   }
-  
-  throw { 
-    message: (response as Unsuccessful).payload.error, 
+
+  throw {
+    message: (response as Unsuccessful).payload.error,
     code: (response as Unsuccessful).payload.code
   }
 }
 
-export class TrezorSigner extends Signer {
+export class TrezorSigner extends Signer implements TypedDataSigner {
   private _path: string
   private _derivePath: string
   private _address?: string
-  
+
   private _isInitialized: boolean
   private _isLoggedIn: boolean
   private _isPrepared: boolean
@@ -50,7 +52,7 @@ export class TrezorSigner extends Signer {
   private _sessionName: string
   private _hdk: HDkey
   private _pathTable: object
-  
+
   readonly _reqIndex?: string | number
   readonly _reqAddress?: string
 
@@ -107,7 +109,7 @@ export class TrezorSigner extends Signer {
 
   public async init(): Promise<any> {
     if (this._isInitialized) { return }
-    
+
     console.info("Init trezor...")
     this._isInitialized = true;
     return TrezorConnect.init(config);
@@ -115,10 +117,10 @@ export class TrezorSigner extends Signer {
 
   public async login(): Promise<any> {
     if (this._isLoggedIn) { return }
-    
+
     console.info("Login to trezor...")
-    this._isLoggedIn = true; 
-    
+    this._isLoggedIn = true;
+
     // TODO: change to random handshake info
     const loginInfo = await TrezorConnect.requestLogin({
       challengeHidden: "0123456789abcdef",
@@ -156,10 +158,10 @@ export class TrezorSigner extends Signer {
   private async getDerivePublicKey(): Promise<HDkey> {
     return this.makeRequest(() => TrezorConnect.getPublicKey({ path: this._derivePath }))
   }
-  
+
   public async getAddress(): Promise<string> {
     if (!this._address) {
-      const result = await this.makeRequest(() =>(TrezorConnect.ethereumGetAddress({
+      const result = await this.makeRequest(() => (TrezorConnect.ethereumGetAddress({
         path: this._path
       })));
       this._address = (result.address || '').toLowerCase()
@@ -173,7 +175,7 @@ export class TrezorSigner extends Signer {
       path: this._path,
       message: (message as string)
     }))
-    
+
     return result.signature
   }
 
@@ -182,7 +184,7 @@ export class TrezorSigner extends Signer {
   ): Promise<string> {
     const tx = await utils.resolveProperties(transaction)
 
-    const unsignedTx : UnsignedTransaction = {
+    const unsignedTx: UnsignedTransaction = {
       to: tx.to,
       nonce: parseInt(tx.nonce.toString()),
       gasLimit: tx.gasLimit,
@@ -197,7 +199,7 @@ export class TrezorSigner extends Signer {
     if (tx.maxPriorityFeePerGas) unsignedTx.maxPriorityFeePerGas = tx.maxPriorityFeePerGas
     if (tx.maxFeePerGas) unsignedTx.maxFeePerGas = tx.maxFeePerGas
 
-    const trezorTx : EthereumSignTransaction = {
+    const trezorTx: EthereumSignTransaction = {
       path: this._path,
       transaction: {
         to: (tx.to || '0x').toString(),
@@ -207,13 +209,13 @@ export class TrezorSigner extends Signer {
         nonce: utils.hexlify(tx.nonce),
         data: utils.hexlify(tx.data || '0x'),
         chainId: tx.chainId,
-      }    
+      }
     }
 
-    const {v,r,s} = await this.makeRequest(() => TrezorConnect.ethereumSignTransaction(trezorTx), 1)
+    const { v, r, s } = await this.makeRequest(() => TrezorConnect.ethereumSignTransaction(trezorTx), 1)
 
     const signature = utils.joinSignature({
-      r, 
+      r,
       s,
       v: parseInt(v)
     })
@@ -231,9 +233,41 @@ export class TrezorSigner extends Signer {
   }
 
   public async _signTypedData(
-    ...params: Parameters<providers.JsonRpcSigner["_signTypedData"]>
+    domain: TypedDataDomain, types: Record<string, Array<TypedDataField>>, value: Record<string, any>
   ): Promise<string> {
-    return   // TODO: _signTypedData
+    const EIP712Domain = [];
+    const domainPropertyTypes = ['string', 'uint256', 'bytes32', 'address', 'string']
+    const domainProperties = ['name', 'chainId', 'salt', 'verifyingContract', 'version'];
+    domainProperties.forEach((property, index) => {
+      if (domain[property]) {
+        EIP712Domain.push({
+          type: domainPropertyTypes[index],
+          name: property
+        });
+      }
+    });
+    const eip712Data = {
+      domain,
+      types: {
+        EIP712Domain,
+        ...types
+      },
+      message: value,
+      primaryType: Object.keys(types)[0]
+    } as Parameters<typeof transformTypedData>[0];
+    console.log("EIP712 Data: ", JSON.stringify(eip712Data, null, 4));
+    const { domain_separator_hash, message_hash } = transformTypedData(eip712Data, true);
+    console.log("Domain separator hash: ", domain_separator_hash);
+    console.log("Message hash: ", message_hash);
+
+    const result = await this.makeRequest(() => TrezorConnect.ethereumSignTypedData({
+      path: this._path,
+      metamask_v4_compat: true,
+      data: eip712Data,
+      domain_separator_hash,
+      message_hash
+    }));
+    return result.signature;
   }
 
   private addressFromIndex(pathBase: string, index: number | string): string {
@@ -264,7 +298,7 @@ export class TrezorSigner extends Signer {
     return `${this._derivePath}/${index.toString(10)}`
   }
 
-  private async makeRequest <T> (fn: () => Response<T>, retries = 20) {
+  private async makeRequest<T>(fn: () => Response<T>, retries = 20) {
     try {
       await this.prepare()
 
