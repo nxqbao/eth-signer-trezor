@@ -20,9 +20,10 @@
   },
   "homepage": "https://github.com/nxqbao/eth-signer-trezor#readme",
   "dependencies": {
+    "@trezor/connect": "^9.1.3",
+    "@trezor/connect-plugin-ethereum": "^9.0.2",
     "ethers": "^5.5.4",
-    "hdkey": "^2.0.1",
-    "trezor-connect": "8.2.9-extended"
+    "hdkey": "^2.0.1"
   },
   "devDependencies": {
     "@types/jest": "^28.1.0",

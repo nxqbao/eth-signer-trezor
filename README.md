@@ -1,9 +1,9 @@
-# @nxqbao/eth-signer-trezor
+# @bahuy3103/eth-signer-trezor
 
 `ethers` signer that derives address and signs transactions using Trezor device.
 ## Install
 ```bash
-yarn add @nxqbao/eth-signer-trezor
+yarn add @bahuy3103/eth-signer-trezor
 ```
 
 ## Usage
