@@ -1,5 +1,9 @@
 # @nxqbao/eth-signer-trezor
 
+[![npm (tag)](https://img.shields.io/npm/v/@nxqbao/eth-signer-trezor)](https://www.npmjs.com/package/@nxqbao/eth-signer-trezor)
+
+--------------
+
 `ethers` signer that derives address and signs transactions using Trezor device.
 ## Install
 ```bash
@@ -18,7 +22,7 @@ const derivationPath = `m/44'/60'/0'/0`;  // This follows BIP-44 wallet, without
 
 /**
  * Specifying account by either index in account or by address, NOT both
- * 
+ *
  * const index = 0;
  * const address = undefined;
  **/
