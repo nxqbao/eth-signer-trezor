@@ -164,7 +164,7 @@ export class TrezorSigner extends Signer implements TypedDataSigner {
       const result = await this.makeRequest(() => (TrezorConnect.ethereumGetAddress({
         path: this._path
       })));
-      this._address = (result.address || '').toLowerCase()
+      this._address = result.address ? utils.getAddress(result.address) : '';
     }
 
     return this._address;
